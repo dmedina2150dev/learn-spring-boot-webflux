@@ -3,6 +3,7 @@ package com.springboot.reactor.app;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,10 +46,36 @@ public class SpringBootReactorApplication implements CommandLineRunner {
 		
 		ejemploZipWithRangos();
 		
-		ejemploInterval();
+		//ejemploInterval();
 		
-		ejemploDelayElements();
+		//ejemploDelayElements();
+		
+		ejemploIntervaloInfinito();
 
+	}
+	
+	public void ejemploIntervaloInfinito () throws InterruptedException {
+		
+		// Otro mecanismo de bloque
+		CountDownLatch latch = new CountDownLatch(1);
+		
+		Flux.interval(Duration.ofSeconds(1))
+			.doOnTerminate(() -> latch.countDown())// Va decrementando el latch
+			.flatMap( i -> {
+				if( i >= 5) {
+					return Flux.error(new InterruptedException("Solo hasta 5!"));
+				}
+				
+				return Flux.just(i);
+			})
+			.map( i -> "Holla " + i )
+			.retry(2)// TODO este operador reintenta la operacion(n) cantidad de veces despues que el flujo falla
+			.subscribe(
+					s -> log.info(s),
+					e -> log.error(e.getMessage())
+					);
+		
+		latch.await(); // Espera a que se decremente por completo y lo suelta
 	}
 	
 	public void ejemploDelayElements () throws InterruptedException {
