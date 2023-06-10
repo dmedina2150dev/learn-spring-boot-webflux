@@ -48,10 +48,14 @@ public class SpringBootReactorApplication implements CommandLineRunner {
 	
 	public void ejemploZipWithRangos() {
 		log.info("<---------------  ejemploZipWithRangos  --------------------->");
+		// TODO: EL flujo podria ser desde afuera igual
+		Flux<Integer> rangos = Flux.range(0, 4); 
 		
 		Flux.just(1, 2, 3, 4)
 			.map( i -> (i * 2) )
-			.zipWith(Flux.range(0, 4), (uno, dos) -> String.format("Primer Flux: %d, Segundo Flux: %d ", uno, dos))
+			.zipWith( 
+					Flux.range(0, 4), // TODO: EL flujo lo pasamos por parametro 
+					(uno, dos) -> String.format("Primer Flux: %d, Segundo Flux: %d ", uno, dos))
 			.subscribe( texto -> log.info(texto) );
 	}
 	
