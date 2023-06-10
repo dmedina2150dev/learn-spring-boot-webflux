@@ -41,7 +41,18 @@ public class SpringBootReactorApplication implements CommandLineRunner {
 		ejemploUsuariComentariosZipWith();
 		
 		ejemploUsuariComentariosZipWithII();
+		
+		ejemploZipWithRangos();
 
+	}
+	
+	public void ejemploZipWithRangos() {
+		log.info("<---------------  ejemploZipWithRangos  --------------------->");
+		
+		Flux.just(1, 2, 3, 4)
+			.map( i -> (i * 2) )
+			.zipWith(Flux.range(0, 4), (uno, dos) -> String.format("Primer Flux: %d, Segundo Flux: %d ", uno, dos))
+			.subscribe( texto -> log.info(texto) );
 	}
 	
 	public void ejemploUsuariComentariosZipWithII() {
