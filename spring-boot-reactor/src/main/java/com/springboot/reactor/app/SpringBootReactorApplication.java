@@ -1,7 +1,6 @@
 package com.springboot.reactor.app;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -10,8 +9,9 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-import com.springboot.reactor.app.models.Equipo;
+import com.springboot.reactor.app.models.Comentarios;
 import com.springboot.reactor.app.models.Usuario;
+import com.springboot.reactor.app.models.UsuarioConComentario;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -35,7 +35,28 @@ public class SpringBootReactorApplication implements CommandLineRunner {
 		ejemploToString();
 		
 		ejemploFromCollectListToMono();
+		
+		ejemploUsuariComentariosFlatMap();
 
+	}
+	
+	public void ejemploUsuariComentariosFlatMap () {
+		Mono<Usuario> usuarioMono = Mono.fromCallable(() -> {
+			return new Usuario("Dajan", "Medina");
+		});
+		
+		Mono<Comentarios> comentarioUsuarioMono = Mono.fromCallable(() -> {
+			Comentarios comentarios = new Comentarios();
+			comentarios.addComentarios("Hola pepe, qué tal!");
+			comentarios.addComentarios("Hola Juan, qué tal!");
+			comentarios.addComentarios("Hola Maria, qué tal!");
+			comentarios.addComentarios("Hola Sol, qué tal!");
+			
+			return comentarios;
+		});
+		
+		usuarioMono.flatMap( u -> comentarioUsuarioMono.map( c -> new UsuarioConComentario(u, c) ) )
+			.subscribe( uc -> log.info(uc.toString()) );
 	}
 	
 	public void ejemploFromCollectListToMono() throws Exception {
