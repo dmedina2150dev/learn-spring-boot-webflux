@@ -3,6 +3,8 @@ package com.springboot.reactor.app;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.CountDownLatch;
 
 import org.slf4j.Logger;
@@ -50,9 +52,48 @@ public class SpringBootReactorApplication implements CommandLineRunner {
 		
 		//ejemploDelayElements();
 		
-		ejemploIntervaloInfinito();
-
+		//ejemploIntervaloInfinito();
+		
+		ejemploIntervaloDesdeCreate();
 	}
+	
+	public void ejemploIntervaloDesdeCreate() {
+		
+		Flux.create(emiter -> {
+			Timer timer = new Timer();
+			timer.schedule(new TimerTask() {
+				
+				private Integer contador = 0;
+				
+				@Override
+				public void run() {
+					// TODO Auto-generated method stub
+					emiter.next(++contador);
+					
+					// Condicion para evitar que sea infinito
+					if ( contador == 10 ) {
+						timer.cancel();
+						emiter.complete(); 
+					}
+					
+					// Tiramos un error para comprobar en el subscriber
+					if ( contador == 5 ) {
+						timer.cancel();
+						emiter.error( new InterruptedException("Error, se ha detenido el flux en 5!") );
+					}
+					
+					
+				}
+			}, 1000, 1000);
+		})
+//		.doOnNext( next -> log.info( next.toString() ))
+//		.doOnComplete(() -> log.info("Hemos terminado"))
+		.subscribe(
+				next -> log.info( next.toString()),
+				error -> log.error(error.getMessage()),
+				() -> log.info("Hemos terminado")  
+				);
+	} 
 	
 	public void ejemploIntervaloInfinito () throws InterruptedException {
 		
