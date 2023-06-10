@@ -33,7 +33,34 @@ public class SpringBootReactorApplication implements CommandLineRunner {
 		ejemploFaltMap();
 		
 		ejemploToString();
+		
+		ejemploFromCollectListToMono();
 
+	}
+	
+	public void ejemploFromCollectListToMono() throws Exception {
+		log.info("ejemploFromCollectListToMono");
+		List<Usuario> usuariosArr = new ArrayList<>();
+		usuariosArr.add(new Usuario("Dajan", "Medina"));
+		usuariosArr.add(new Usuario("Darwin", "Medina"));
+		usuariosArr.add(new Usuario("Dajanevi", "Medina"));
+		usuariosArr.add(new Usuario("Janeth", "De Oliveira"));
+		usuariosArr.add(new Usuario("Vefy", "Palacios"));
+		
+		log.info("Comienzo Primera Lista");
+		Flux.fromIterable(usuariosArr)
+			.collectList()
+			.subscribe( lista -> log.info(lista.toString())  );
+		
+		log.info("Fin Primera Lista");
+		
+		log.info("Comienzo segunda Lista");
+		Flux.fromIterable(usuariosArr)
+			.collectList()
+			.subscribe( lista -> {
+				lista.forEach( item -> log.info(item.toString()) );
+			});
+		log.info("Fin segunda Lista");
 	}
 
 	public void ejemploToString() throws Exception {
