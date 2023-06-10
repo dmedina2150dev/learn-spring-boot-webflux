@@ -1,5 +1,6 @@
 package com.springboot.reactor.app;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,7 +44,42 @@ public class SpringBootReactorApplication implements CommandLineRunner {
 		ejemploUsuariComentariosZipWithII();
 		
 		ejemploZipWithRangos();
+		
+		ejemploInterval();
+		
+		ejemploDelayElements();
 
+	}
+	
+	public void ejemploDelayElements () throws InterruptedException {
+		log.info("<---------------  ejemploDelayElements  --------------------->");
+		Flux<Integer> rango = Flux.range(1, 12)
+				.delayElements(Duration.ofSeconds(1))
+				.doOnNext( i -> log.info(i.toString()));
+				
+		// rango.subscribe(); // TODO: No se veria en el log porque se ejecuta en segundo plano
+		//rango.blockLast(); // TODO: IMPORTANTE NO ES RECOMENDABLE PORQUE ESTE METODO SE SUSCRIBE PERO BLOQUEA LOS HILOS Y PODRIA CREAR CUELLOS DE BOTELLA
+		// Se usa (blockLast) solo en modo de prueba para ver los resultados en el log
+		
+		// Otra forma
+		rango.subscribe();
+		//Thread.sleep(13000);
+	}
+	
+	public void ejemploInterval () {
+		log.info("<---------------  ejemploIntervalos  --------------------->");
+		Flux<Integer> rango = Flux.range(1, 12);
+		
+		
+		// TODO: Le aplicamos in intervalo
+		Flux<Long> retraso = Flux.interval(Duration.ofSeconds(1));
+		
+		rango.zipWith(retraso, (ra, re) -> ra)
+			.doOnNext( i -> log.info(i.toString()) )
+			.subscribe(); // TODO: No se veria en el log porque se ejecuta en segundo plano
+			//.blockLast();// TODO: IMPORTANTE NO ES RECOMENDABLE PORQUE ESTE METODO SE SUSCRIBE PERO BLOQUEA LOS HILOS Y PODRIA CREAR CUELLOS DE BOTELLA
+			// Se usa (blockLast) solo en modo de prueba para ver los resultados en el log
+		
 	}
 	
 	public void ejemploZipWithRangos() {
