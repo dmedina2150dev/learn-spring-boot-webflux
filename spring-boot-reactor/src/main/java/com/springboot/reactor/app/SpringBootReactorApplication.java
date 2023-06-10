@@ -31,34 +31,93 @@ public class SpringBootReactorApplication implements CommandLineRunner {
 		ejemploIterable();
 
 		ejemploFaltMap();
-		
+
 		ejemploToString();
-		
+
 		ejemploFromCollectListToMono();
-		
+
 		ejemploUsuariComentariosFlatMap();
+
+		ejemploUsuariComentariosZipWith();
+		
+		ejemploUsuariComentariosZipWithII();
 
 	}
 	
-	public void ejemploUsuariComentariosFlatMap () {
+	public void ejemploUsuariComentariosZipWithII() {
+		log.info("ejemploUsuariComentariosZipWithII");
 		Mono<Usuario> usuarioMono = Mono.fromCallable(() -> {
 			return new Usuario("Dajan", "Medina");
 		});
-		
+
+		Mono<Comentarios> comentarioUsuarioMono = Mono.fromCallable(() -> {
+			Comentarios comentarios = new Comentarios();
+			comentarios.addComentarios("Hola Vefy, qué tal!");
+			comentarios.addComentarios("Te amo con todo mi corazon");
+			comentarios.addComentarios("Eres el amor de mi vida");
+			comentarios.addComentarios("Me chupa la polla");
+
+			return comentarios;
+		});
+
+		Mono<UsuarioConComentario> usuarioConComentario = usuarioMono
+				.zipWith(comentarioUsuarioMono)
+				.map( tuple -> {
+					Usuario u = tuple.getT1();
+					Comentarios c = tuple.getT2();
+					
+					return new UsuarioConComentario(u, c);
+				});
+				
+		usuarioConComentario.subscribe(uc -> log.info(uc.toString()));
+
+	}
+
+	public void ejemploUsuariComentariosZipWith() {
+		log.info("ejemploUsuariComentariosZipWith");
+		Mono<Usuario> usuarioMono = Mono.fromCallable(() -> {
+			return new Usuario("Pepe", "Agular");
+		});
+
 		Mono<Comentarios> comentarioUsuarioMono = Mono.fromCallable(() -> {
 			Comentarios comentarios = new Comentarios();
 			comentarios.addComentarios("Hola pepe, qué tal!");
 			comentarios.addComentarios("Hola Juan, qué tal!");
 			comentarios.addComentarios("Hola Maria, qué tal!");
 			comentarios.addComentarios("Hola Sol, qué tal!");
-			
+
 			return comentarios;
 		});
-		
-		usuarioMono.flatMap( u -> comentarioUsuarioMono.map( c -> new UsuarioConComentario(u, c) ) )
-			.subscribe( uc -> log.info(uc.toString()) );
-	}
+
+		Mono<UsuarioConComentario> usuarioConComentario = usuarioMono
+				.zipWith(comentarioUsuarioMono, (user, comentarioUsuario) -> new UsuarioConComentario(user, comentarioUsuario));
+				
+		usuarioConComentario.subscribe(uc -> log.info(uc.toString())); 
 	
+	}
+
+	public void ejemploUsuariComentariosFlatMap() {
+		log.info("ejemploUsuariComentariosFlatMap");
+		Mono<Usuario> usuarioMono = Mono.fromCallable(() -> {
+			return new Usuario("Dajan", "Medina");
+		});
+
+		Mono<Comentarios> comentarioUsuarioMono = Mono.fromCallable(() -> {
+			Comentarios comentarios = new Comentarios();
+			comentarios.addComentarios("Hola pepe, qué tal!");
+			comentarios.addComentarios("Hola Juan, qué tal!");
+			comentarios.addComentarios("Hola Maria, qué tal!");
+			comentarios.addComentarios("Hola Sol, qué tal!");
+
+			return comentarios;
+		});
+
+		usuarioMono.flatMap(u -> comentarioUsuarioMono.map(c -> new UsuarioConComentario(u, c)))
+			.subscribe(uc -> log.info(uc.toString()));
+
+
+	}
+
 	public void ejemploFromCollectListToMono() throws Exception {
 		log.info("ejemploFromCollectListToMono");
 		List<Usuario> usuariosArr = new ArrayList<>();
@@ -67,20 +126,16 @@ public class SpringBootReactorApplication implements CommandLineRunner {
 		usuariosArr.add(new Usuario("Dajanevi", "Medina"));
 		usuariosArr.add(new Usuario("Janeth", "De Oliveira"));
 		usuariosArr.add(new Usuario("Vefy", "Palacios"));
-		
+
 		log.info("Comienzo Primera Lista");
-		Flux.fromIterable(usuariosArr)
-			.collectList()
-			.subscribe( lista -> log.info(lista.toString())  );
-		
+		Flux.fromIterable(usuariosArr).collectList().subscribe(lista -> log.info(lista.toString()));
+
 		log.info("Fin Primera Lista");
-		
+
 		log.info("Comienzo segunda Lista");
-		Flux.fromIterable(usuariosArr)
-			.collectList()
-			.subscribe( lista -> {
-				lista.forEach( item -> log.info(item.toString()) );
-			});
+		Flux.fromIterable(usuariosArr).collectList().subscribe(lista -> {
+			lista.forEach(item -> log.info(item.toString()));
+		});
 		log.info("Fin segunda Lista");
 	}
 
@@ -93,8 +148,8 @@ public class SpringBootReactorApplication implements CommandLineRunner {
 		usuariosArr.add(new Usuario("Janeth", "De Oliveira"));
 		usuariosArr.add(new Usuario("Vefy", "Palacios"));
 
-		Flux.fromIterable(usuariosArr)
-				.map(usuario -> usuario.getNombre().toUpperCase().concat(" ").concat(usuario.getApellido().toUpperCase()))
+		Flux.fromIterable(usuariosArr).map(
+				usuario -> usuario.getNombre().toUpperCase().concat(" ").concat(usuario.getApellido().toUpperCase()))
 				.flatMap(nombre -> {
 
 					if (nombre.contains("medina".toUpperCase())) {
@@ -106,7 +161,6 @@ public class SpringBootReactorApplication implements CommandLineRunner {
 				}).map(nombre -> {
 
 					return nombre.toLowerCase();
-				
 
 				}).subscribe(u -> log.info(u.toString()));
 	}
@@ -131,8 +185,7 @@ public class SpringBootReactorApplication implements CommandLineRunner {
 						return Mono.empty();
 					}
 
-				})
-				.map(usuario -> {
+				}).map(usuario -> {
 
 					String nombre = usuario.getNombre().toLowerCase();
 					usuario.setNombre(nombre);
