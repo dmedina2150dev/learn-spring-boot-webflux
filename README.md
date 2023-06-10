@@ -41,6 +41,15 @@ Mono<String> just = Flux.just("1");
 
 
 # Iniciativa que regula las api de programacion reactiva 
+
 [Reactive Streams](https://www.reactive-streams.org/)
 [Project Reactor](https://projectreactor.io/) Implementación que utiliza spring para la programacion reactiva.
 [ReactiveX](https://reactivex.io/) Implementación de programación reactiva multiplataforma (Por debajo funciona con la misma implementacion reactor)
+
+
+
+## La Contrapresion
+
+Por defecto cuando nos subscribimos a un observable, solicitamos la cantidad maxima que puede enviar el productor. Es decir que el observable nos envie todos los elementos de una sola vez.
+Pero existe el problema de si tenemos recursos limitados, de hardware o de software, esto podria ser pesado o abrumador de procesar por el subscriptor poder procesar todo de una sola vez.
+Aqui es donde entra la contrapresion, poder indicar el suscriptor al productor la cantidad de elementos que debe enviar por cada vez. Por ejemplo en lugar de enviar todos los elementos que envie 5 por solicitud.

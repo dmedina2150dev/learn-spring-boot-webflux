@@ -7,6 +7,8 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.CountDownLatch;
 
+import org.reactivestreams.Subscriber;
+import org.reactivestreams.Subscription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
@@ -32,29 +34,83 @@ public class SpringBootReactorApplication implements CommandLineRunner {
 	@Override
 	public void run(String... args) throws Exception {
 
-		ejemploIterable();
+//		ejemploIterable();
 
-		ejemploFaltMap();
+//		ejemploFaltMap();
 
-		ejemploToString();
+//		ejemploToString();
 
-		ejemploFromCollectListToMono();
+//		ejemploFromCollectListToMono();
 
-		ejemploUsuariComentariosFlatMap();
+//		ejemploUsuariComentariosFlatMap();
 
-		ejemploUsuariComentariosZipWith();
+//		ejemploUsuariComentariosZipWith();
 		
-		ejemploUsuariComentariosZipWithII();
+//		ejemploUsuariComentariosZipWithII();
 		
-		ejemploZipWithRangos();
+//		ejemploZipWithRangos();
 		
-		//ejemploInterval();
+//		ejemploInterval();
 		
-		//ejemploDelayElements();
+//		ejemploDelayElements();
 		
-		//ejemploIntervaloInfinito();
+//		ejemploIntervaloInfinito();
 		
-		ejemploIntervaloDesdeCreate();
+//		ejemploIntervaloDesdeCreate();
+		
+		ejemploContraPresion();
+	}
+	
+	public void ejemploContraPresion() {
+		
+		Flux.range(1, 10)
+			.log() // Este evento nos permite ver los que solicita el suscriptor
+			//.subscribe( i -> log.info(i.toString()) ); // TODO: Aqui se pedia todo
+//			.subscribe( new Subscriber<Integer>() { // TODO: Aqui controlabamos manualmente el limite de elementos a enviar
+//				
+//				private Subscription s;
+//				
+//				private Integer limite = 2;
+//				
+//				private Integer consumido = 0;
+//
+//				@Override
+//				public void onSubscribe(Subscription s) {
+//					// TODO Aqui manejamos lo que podemos pedir al productor o flujo u Observable
+//					this.s = s;
+//					s.request(limite);
+//					
+//				}
+//
+//				@Override
+//				public void onNext(Integer t) {
+//					// TODO Cada vez que recibimos un objeto
+//					
+//					log.info(t.toString());
+//					
+//					consumido++;
+//					
+//					if( consumido == limite ) {
+//						consumido = 0;
+//						s.request(limite);
+//					}
+//					
+//				}
+//
+//				@Override
+//				public void onError(Throwable t) {
+//					// TODO Para manejar los errores
+//					
+//				}
+//
+//				@Override
+//				public void onComplete() {
+//					// TODO Cuando termina la transmision 
+//					
+//				}
+//			} );
+			.limitRate(5) // TODO: de esta forma se maneja la contra presion de forma mas automatica.
+			.subscribe();
 	}
 	
 	public void ejemploIntervaloDesdeCreate() {
