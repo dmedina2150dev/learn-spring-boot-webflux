@@ -31,10 +31,40 @@ public class SpringBootReactorApplication implements CommandLineRunner {
 		ejemploIterable();
 
 		ejemploFaltMap();
+		
+		ejemploToString();
 
 	}
 
+	public void ejemploToString() throws Exception {
+		log.info("ejemploToString");
+		List<Usuario> usuariosArr = new ArrayList<>();
+		usuariosArr.add(new Usuario("Dajan", "Medina"));
+		usuariosArr.add(new Usuario("Darwin", "Medina"));
+		usuariosArr.add(new Usuario("Dajanevi", "Medina"));
+		usuariosArr.add(new Usuario("Janeth", "De Oliveira"));
+		usuariosArr.add(new Usuario("Vefy", "Palacios"));
+
+		Flux.fromIterable(usuariosArr)
+				.map(usuario -> usuario.getNombre().toUpperCase().concat(" ").concat(usuario.getApellido().toUpperCase()))
+				.flatMap(nombre -> {
+
+					if (nombre.contains("medina".toUpperCase())) {
+						return Mono.just(nombre);
+					} else {
+						return Mono.empty();
+					}
+
+				}).map(nombre -> {
+
+					return nombre.toLowerCase();
+				
+
+				}).subscribe(u -> log.info(u.toString()));
+	}
+
 	public void ejemploFaltMap() throws Exception {
+		log.info("ejemploFaltMap");
 		List<String> usuariosArr = new ArrayList<>();
 
 		usuariosArr.add("Dajan Medina");
@@ -44,11 +74,14 @@ public class SpringBootReactorApplication implements CommandLineRunner {
 		usuariosArr.add("Vefy Palacios");
 
 		Flux.fromIterable(usuariosArr)
-				.map(nombre -> new Usuario(nombre.split(" ")[0].toUpperCase(), nombre.split(" ")[1].toUpperCase())
-				)
-				.filter(usuario -> {
+				.map(nombre -> new Usuario(nombre.split(" ")[0].toUpperCase(), nombre.split(" ")[1].toUpperCase()))
+				.flatMap(usuario -> {
 
-					return usuario.getApellido().toLowerCase().equals("medina");
+					if (usuario.getApellido().equalsIgnoreCase("medina")) {
+						return Mono.just(usuario);
+					} else {
+						return Mono.empty();
+					}
 
 				})
 				.map(usuario -> {
@@ -57,11 +90,11 @@ public class SpringBootReactorApplication implements CommandLineRunner {
 					usuario.setNombre(nombre);
 					return usuario;
 
-				})
-				.subscribe( u -> log.info(u.toString()) );
+				}).subscribe(u -> log.info(u.toString()));
 	}
 
 	public void ejemploIterable() throws Exception {
+		log.info("ejemploIterable");
 		List<String> usuariosArr = new ArrayList<>();
 
 		usuariosArr.add("Dajan Medina");
@@ -74,14 +107,10 @@ public class SpringBootReactorApplication implements CommandLineRunner {
 
 		Flux<Usuario> usuarios = nombres
 				.map(nombre -> new Usuario(nombre.split(" ")[0].toUpperCase(), nombre.split(" ")[1].toUpperCase()))
-				.flatMap(usuario -> {
-					
-					if( usuario.getApellido().equalsIgnoreCase("medina") ) {
-						return Mono.just(usuario);
-					} else {
-						return Mono.empty();
-					}
-					
+				.filter(usuario -> {
+
+					return usuario.getApellido().toLowerCase().equals("medina");
+
 				}).doOnNext(usuario -> {
 					if (usuario == null) {
 						throw new RuntimeException("Nombres no puede ser vacio");
